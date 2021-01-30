@@ -1,0 +1,115 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define fr(i,n) for(int i=0; i<n; i++)
+#define rep(i, st, en) for(int i=st; i<=en; i++)
+#define repn(i, st, en) for(int i=st; i>=en; i--)
+#define sq(a) (a*a)
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+ll mod = 1e9+7;
+
+ll gcdll(ll a, ll b){
+    if(!b) return a;
+    return gcdll(b, a%b);
+}
+
+void seive(int n){
+    vector<bool> is_prime(n+1, true);
+    is_prime[0] = is_prime[1] = false;
+
+    for(int i=2; i*i<=n; i++){
+        if(is_prime[i]){
+            for(int j=i*i; j<=n; j+=i){
+                is_prime[j] = false;
+            }
+        }
+    }
+}
+
+vector<int> constructZFunc(string s){
+    int n = s.size();
+    vector<int> z(n);
+    int l, r;
+    l = r = 0;
+    z[0] = 0;
+    rep(i, 1, n-1){
+        z[i] = 0;
+        if(i<=r){
+            z[i] = min(r-i+1, z[i-l]);  /// initialization, req. for linear time approach.
+        }
+        while(i+z[i] < n && s[z[i]] == s[i+z[i]])
+            ++z[i];
+        if(i+z[i]-1 > r){
+            r = i+z[i]-1;
+            l = i;
+        }
+    }
+    return z;
+}
+
+void solve(){
+    int n;
+    cin>>n;
+    string s;
+    cin>>s;
+    string t;
+
+    map<char, bool> mp;
+    for(auto c: s) mp[c] = true;
+    char x;
+    vector<pii> v;  /// start and end of xxxx segment
+    bool marked[n];
+
+    for(auto rit = mp.rbegin(); rit != mp.rend(); rit++){
+
+        x = rit->first;
+        if(x == 'a') break;
+
+        v.clear();
+        fr(i, s.size()) marked[i] = true;
+        int i = 0;
+        while(i < s.size()){
+            if(s[i] == x){
+                int j = i+1;
+                while(j < s.size() && s[j] == x) j++;
+                v.push_back({i, j-1});
+                i = j;
+            } else i++;
+        }
+
+        for(auto p: v){
+            if((p.first && (int)s[p.first - 1] == x - 1) ||
+               (p.second != s.size()-1 && (int)s[p.second + 1] == x - 1)){
+                    rep(i, p.first, p.second) marked[i] = false;
+               }
+        }
+
+        t.clear();
+        fr(i, s.size()){
+            if(marked[i])
+                t += s[i];
+        }
+
+        s = t;
+    }
+
+    cout<<(n - s.size());
+
+}
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+
+    ll t = 1;
+    //  cin>>t;
+    while(t--){
+        solve();
+    }
+
+    return 0;
+}
+

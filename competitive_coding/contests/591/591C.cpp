@@ -1,0 +1,130 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define fr(i,n) for(int i=0; i<n; i++)
+#define rep(i, st, en) for(int i=st; i<=en; i++)
+#define repn(i, st, en) for(int i=st; i>=en; i--)
+#define sq(a) (a*a)
+typedef long long ll;
+typedef pair<int, ll> pill;
+typedef pair<ll, ll> pll;
+ll mod = 1e9+7;
+
+ll gcdll(ll a, ll b){
+    if(!b) return a;
+    return gcdll(b, a%b);
+}
+
+int gcd(int a, int b){
+    if(!b) return a;
+    return  gcd(b, a%b);
+}
+
+void seive(int n){
+    vector<bool> is_prime(n+1, true);
+    is_prime[0] = is_prime[1] = false;
+
+    for(int i=2; i*i<=n; i++){
+        if(is_prime[i]){
+            for(int j=i*i; j<=n; j+=i){
+                is_prime[j] = false;
+            }
+        }
+    }
+}
+
+vector<int> constructZFunc(string s){
+    int n = s.size();
+    vector<int> z(n);
+    int l, r;
+    l = r = 0;
+    z[0] = 0;
+    rep(i, 1, n-1){
+        z[i] = 0;
+        if(i<=r){
+            z[i] = min(r-i+1, z[i-l]);  /// initialization, req. for linear time approach.
+        }
+        while(i+z[i] < n && s[z[i]] == s[i+z[i]])
+            ++z[i];
+        if(i+z[i]-1 > r){
+            r = i+z[i]-1;
+            l = i;
+        }
+    }
+    return z;
+}
+
+void swap(int &a, int &b){
+    int t = a;
+    a = b;
+    b = t;
+}
+
+int solve(int n){
+    ll arr[n];
+    fr(i, n) cin>>arr[i];
+    sort(arr, arr+n);
+    ll largest[n+1];
+    rep(i, 1, n){
+        largest[i] = arr[n-i];
+    }
+
+    int x, a, y, b;
+    cin>>x>>a>>y>>b;
+    ll k, sum = 0;
+    cin>>k;
+
+    if(x < y){
+        swap(x, y);
+        swap(a, b);
+    }
+
+    /// now x > y gauranteed!
+
+    ll cnt[2] = {0};    /// cnt[0] no. of common spots found for 'a&b'; cnt[1] no. of exclusive 'a' spots found so far.
+
+    int j = 1;
+    rep(i, 1, n){
+        if((i%a == 0) && (i%b == 0)){
+            int si = cnt[0]+1;
+            sum += (largest[si]*(x+y))/100;
+            sum -= (x*largest[si])/100;
+
+            si = cnt[0]+cnt[1]+1;
+            sum += (largest[si]*x)/100;
+            sum -= (y*(largest[si] - largest[j])/100);
+
+            cnt[0]++;
+            j++;
+        } else if (i%a == 0) {
+            int si = cnt[0]+cnt[1]+1;
+            sum += (largest[si]*x)/100;
+            sum -= (y*(largest[si] - largest[j])/100);
+            cnt[1]++;
+            j++;
+        } else if (i%b == 0) {
+            sum += (largest[j]*y)/100;
+            j++;
+        }
+        if(sum >= k) return i;
+    }
+
+    return -1; /// still not found
+}
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+
+    int q, n;
+    cin>>q;
+
+    while(q--){
+        cin>>n;
+        cout<<solve(n)<<endl;
+    }
+
+    return 0;
+}
+
